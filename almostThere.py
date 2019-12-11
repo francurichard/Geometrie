@@ -137,18 +137,18 @@ def DecidePrincipalsPoints(): # Asume the points are in clockwise order
     global Points
     n = NoOfPoints
     for i in range(n):
-        p1 = i - 1
-        p2 = i
-        p3 = i + 1
-        if i == 0:
-            p1 = n - 1
-        if i == n - 1:
-            p3 = 0
-
-        for j in range(n):
-            if (p1 != j and p2 != j and p3 != j):
-                if isInside(Points[p1], Points[p2], Points[p3], Points[j]) == True:
-                    Principals[i] = False
+        if Convexes[i] == True :
+            p1 = i - 1
+            p2 = i
+            p3 = i + 1
+            if i == 0:
+                p1 = n - 1
+            if i == n - 1:
+                p3 = 0
+            for j in range(n):
+                if (p1 != j and p2 != j and p3 != j):
+                    if isInside(Points[p1], Points[p2], Points[p3], Points[j]) == True:
+                        Principals[i] = False
 
 
 def PrintPrincipalsNotPrincipals():
