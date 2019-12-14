@@ -1,21 +1,33 @@
-import math
-import matplotlib.pyplot as plt
+from collections import defaultdict
+from drawing import Drawing
 
-Points = [] # List of Points
+MAX_NO_POINTS = 1000
+
+# List of Points
+Points = []
+
+# Drawing Points
+drawing_points = defaultdict(list)
 
 BottomLeftPoint = [1e10, 1e10]
 indexOfBottomLeftPoint = 0
 principalSign = -1
 
-Convexes = [False] * 1000 # List of bool which can tell us whether a point is convex, or concave otherwise
-Principals = [True] * 1000 # List of bool which can tell us whether a point is principal, or non-principal otherwise
+# List of bool which can tell us whether a point is convex, or concave otherwise
+Convexes = [False] * MAX_NO_POINTS
+# List of bool which can tell us whether a point is principal, or non-principal otherwise
+Principals = [True] * MAX_NO_POINTS
 NoOfPoints = 0
+
 
 # Handle data --------------------------------------------------------------------------------------
 def setNoOfPoints(x):
     global NoOfPoints
     NoOfPoints = int(x)
-def Read_Data(): # Function that reads data from the "puncte.txt" file
+
+
+# Function that reads data from the "puncte.txt" file
+def Read_Data():
     global BottomLeftPoint
     global indexOfBottomLeftPoint
     f = open("puncte.txt", "r+")
@@ -25,13 +37,13 @@ def Read_Data(): # Function that reads data from the "puncte.txt" file
             e = line.split()
             setNoOfPoints(e[0])
         else:
-            a,b = line.split()
+            a, b = line.split()
             c = float(a)
             d = float(b)
             read_point = []
             read_point.append(c)
             read_point.append(d)
-            Points.insert(i-1,read_point)
+            Points.insert(i-1, read_point)
             if d < BottomLeftPoint[1]:
                 indexOfBottomLeftPoint = i - 1
                 BottomLeftPoint = read_point
@@ -39,7 +51,8 @@ def Read_Data(): # Function that reads data from the "puncte.txt" file
                 if c < BottomLeftPoint[0]:
                     BottomLeftPoint = read_point
                     indexOfBottomPoint = i - 1	
-        i+=1
+        i += 1
+
 
 def Print_Data():
     global BottomLeftPoint
@@ -47,6 +60,7 @@ def Print_Data():
     global NoOfPoints
     for point in Points:
         print(point)
+
 
 def translatePoints():
     # translates points such that bottom poin will be the first one
@@ -63,17 +77,17 @@ def translatePoints():
         auxList1.append(Points[i])
     for i in range(ind, ind + n):
         auxList2.append(auxList1[i])
-    for i in range (0, n):
+    for i in range(0, n):
         Points[i] = auxList2[i]
 
 
 def PrintPoint(P, attribute):
-    px , py = P[0], P[1]
-    print("Punctul de coordonate ( {} , {} ) este {} ".format( px, py,attribute))
+    px, py = P[0], P[1]
+    print("Punctul de coordonate ( {} , {} ) este {} ".format(px, py, attribute))
 
 
 # Part of CONVEX - CONCAVE POINTS --------------------------------------------------------------------------------------
-def orientation(p,q,r):
+def orientation(p, q, r):
     ans = (q[1]-p[1])*(r[0]-q[0]) - (q[0]-p[0])*(r[1]-q[1])
     if ans == 0:
         return ans
@@ -81,6 +95,7 @@ def orientation(p,q,r):
         return 1
     else:
         return -1
+
 
 def setPrincipalSign():
     global Points
@@ -90,31 +105,34 @@ def setPrincipalSign():
     Convexes[0] = True
     principalSign = orientation(Points[NoOfPoints - 1], Points[0], Points[1])
 
+
 def DecideConvexConcavePoints():
     global NoOfPoints
     global Convexes
     n = NoOfPoints
-    for i in range(1,NoOfPoints):
+    for i in range(1, NoOfPoints):
         p1 = i - 1
         p2 = i
         p3 = i + 1
-        if (i == n - 1):
+        if i == n - 1:
             p3 = 0
         o = orientation(Points[p1], Points[p2], Points[p3])
         if o == principalSign:
             Convexes[i] = True
 
+
 def PrintConvexesConcaves():
     global Convexes
-    for i in range(0,NoOfPoints):
-        if Convexes[i] == True:
-            PrintPoint(Points[i],"convex")
+    for i in range(0, NoOfPoints):
+        if Convexes[i]:
+            PrintPoint(Points[i], "convex")
         else:
-            PrintPoint(Points[i],"concav")
+            PrintPoint(Points[i], "concav")
     print("\n")
 
-# End of CONVEX - CONCAVE POINTS Part--------------------------------------------------------------------------------------
-# Part of PRINCIPAL - NOT-PRINCIPAL POINTS --------------------------------------------------------------------------------
+
+# End of CONVEX - CONCAVE POINTS Part-----------------------------------------------------------------------------------
+# Part of PRINCIPAL - NOT-PRINCIPAL POINTS -----------------------------------------------------------------------------
 def area(p1, p2, p3):
     return abs((
         p1[0] * (p2[1] - p3[1]) +
@@ -122,22 +140,25 @@ def area(p1, p2, p3):
         p3[0] * (p1[1] - p2[1])
         ) / 2.0)
 
+
 def isInside(p1, p2, p3, q):
     A = area(p1, p2, p3)
     A1 = area(q, p2, p3)
     A2 = area(p1, q, p3)
     A3 = area(p1, p2, q) 
-    if (A == A1 + A2 + A3):
+    if A == A1 + A2 + A3:
         return True
     else:
         return False
 
-def DecidePrincipalsPoints(): # Asume the points are in clockwise order
+
+# Asume the points are in clockwise order
+def DecidePrincipalsPoints():
     global NoOfPoints
     global Points
     n = NoOfPoints
     for i in range(n):
-        if Convexes[i] == True :
+        if Convexes[i]:
             p1 = i - 1
             p2 = i
             p3 = i + 1
@@ -146,23 +167,28 @@ def DecidePrincipalsPoints(): # Asume the points are in clockwise order
             if i == n - 1:
                 p3 = 0
             for j in range(n):
-                if (p1 != j and p2 != j and p3 != j):
-                    if isInside(Points[p1], Points[p2], Points[p3], Points[j]) == True:
+                if p1 != j and p2 != j and p3 != j:
+                    if isInside(Points[p1], Points[p2], Points[p3], Points[j]):
                         Principals[i] = False
 
 
 def PrintPrincipalsNotPrincipals():
-    for i in range(0,NoOfPoints):
-        if Principals[i] == True:
-            PrintPoint(Points[i],"principal")
+    for i in range(0, NoOfPoints):
+        if Principals[i]:
+            PrintPoint(Points[i], "principal")
         else:
-            PrintPoint(Points[i],"neprincipal")
+            PrintPoint(Points[i], "neprincipal")
     print("\n")
 
-# End of PRINCIPAL - NOT-PRINCIPAL POINTS Part-----------------------------------------------------------------------------
+
+def map_points():
+    for index in range(NoOfPoints):
+        drawing_points['coordinates'].append(Points[index])
+        drawing_points['convexity'].append(Convexes[index])
+        drawing_points['principality'].append(Principals[index])
 
 
-
+# End of PRINCIPAL - NOT-PRINCIPAL POINTS Part--------------------------------------------------------------------------
 def Main():
     Read_Data()
     translatePoints()
@@ -173,6 +199,10 @@ def Main():
     PrintPrincipalsNotPrincipals()
 
     # A ramas partea grafica
-    
-if __name__=='__main__':
+    map_points()
+    drawing = Drawing(drawing_points)
+    drawing.draw()
+
+
+if __name__ == '__main__':
     Main()
